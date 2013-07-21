@@ -4,8 +4,14 @@ import os
 # Clear the screen.
 os.system('clear')
 
+##############################
+### SET YOUR VARIABLES
 # Our Frequency List
-stations = ["94.5", "99.9", "107.1"]
+stations = ["88.7", "102.1", "95.5"]
+squelchlist = ["20", "10", "80"]
+sampletime = "10"
+#webpage = /var/www/index.html
+###############################
 
 # Create an empty list.
 samples = []
@@ -13,8 +19,8 @@ report = []
 
 # Create a function that takes the frequency you entered and inserts it into the command. 
 # Then it samples the frequency and puts it into a list called "samples" and returns the list.
-def freqsample(n):
-    command = "/usr/local/bin/rtl_fm -f %sM -W -s 200000 -r 48000 -l 9 - | /usr/bin/aplay -r 48k -f S16_LE -v -v -v -d 3" % n
+def freqsample(frq, sqel, st):
+    command = "/usr/local/bin/rtl_fm -f %sM -W -s 200000 -r 48000 -l %s - | /usr/bin/aplay -r 48k -f S16_LE -v -v -v -d %s" % (frq, sqel, st)
     rawsample = subprocess.Popen([command],stdout=subprocess.PIPE, shell=True)
     for line in rawsample.stdout:
         samples.append(line)
@@ -32,7 +38,9 @@ def freqsample(n):
     # Print the results.
     if loopcount == 0:
         report.append("===========================================")
-    report.append("Station: %s" % n)
+    report.append("Station: %s" % frq)
+    report.append("Squelch Level: %s" % sqel)
+    report.append("Sample Time: %s" % st)
     report.append("Signal total is: %s " % total)
     report.append("Number of samples is %s " % samps)
     report.append("Signal average is: %f " % sigavg)
@@ -43,7 +51,7 @@ loopcount = 0
 print loopcount
 for i in stations:
     if loopcount < len(stations):
-        freqsample(i)
+        freqsample(i, squelchlist[loopcount], sampletime)
         loopcount += 1
 # Print our report.
 os.system('clear')
